@@ -1,0 +1,4 @@
+from gym_minesweeper.envs.minesweeper_beginner_env import MinesweeperBeginnerEnv
+from gym_minesweeper.envs.minesweeper_intermediate_env import \
+    MinesweeperIntermediateEnv
+from gym_minesweeper.envs.minesweeper_env import MinesweeperEnv

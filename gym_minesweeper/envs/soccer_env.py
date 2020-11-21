@@ -12,7 +12,7 @@ except ImportError as e:
 import logging
 logger = logging.getLogger(__name__)
 
-class SoccerEnv(gym.Env, utils.EzPickle):
+class MinesweeperEnv(gym.Env, utils.EzPickle):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
@@ -157,3 +157,4 @@ ACTION_LOOKUP = {
     3 : hfo_py.TACKLE, # Used on defense to slide tackle the ball
     4 : hfo_py.CATCH,  # Used only by goalie to catch the ball
 }
+
