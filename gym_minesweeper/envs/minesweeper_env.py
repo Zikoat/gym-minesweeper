@@ -2,7 +2,6 @@ import random
 
 import gym
 import numpy as np
-from gym_minigrid.window import Window
 
 class MinesweeperEnv(gym.Env):
 
@@ -14,8 +13,7 @@ class MinesweeperEnv(gym.Env):
         self.debug = debug
         self.flood_fill = flood_fill
         self.punishment = punishment
-        self.window = Window('gym_minesweeper')
-        self.window.reg_event("button_press_event", self._onclick)
+        self.window = None
 
     def step(self, action):
         """
@@ -45,15 +43,20 @@ class MinesweeperEnv(gym.Env):
                  However, official evaluations of your agent are not allowed to
                  use this for learning.
         """
+        prev_game_over = self._game_over()
+
         self.steps += 1
         x, y = self._parse_action(action)
         self._open_cell(x, y)
+
         reward = self._get_reward()
         observation = self._get_observation()
-        episode_over = self._game_over()
-        if self.debug:
-            print("the game is {} over".format("" if episode_over else "not"))
-        return observation, reward, episode_over, self._get_info()
+        done = self._game_over()
+
+        if self.debug and not prev_game_over and done:
+            print("game over")
+
+        return observation, reward, done, self._get_info(prev_game_over, action)
 
     def reset(self):
         self.observation_space = gym.spaces.Box(-2, 8,
@@ -70,7 +73,7 @@ class MinesweeperEnv(gym.Env):
                           (-1, 1), (0, 1), (1, 1)]
         return self._get_observation()
 
-    def render(self, mode='human'):
+    def render(self, mode='human', close=False):
         if mode == "terminal":
             print()
             for row in self._get_observation():
@@ -89,12 +92,25 @@ class MinesweeperEnv(gym.Env):
                 print(rowstring)
             print()
 
-        if mode == "rgb_array":
-            return [[COLORS[cell] for cell in row] for row in self._get_observation()]
+        if close:
+            if self.window:
+                self.window.close()
+            return
 
-        if mode == "human":
+        if mode == 'human' and not self.window:
             img = self.render(mode="rgb_array")
+            from gym_minigrid.window import Window
+            self.window = Window('gym_minigrid')
+            self.window.reg_event("button_press_event", self._onclick)
+            self.window.show(block=False)
+
+        img = [[COLORS[cell] for cell in row] for row in self._get_observation()]
+
+        if mode == 'human':
             self.window.show_img(img)
+            self.window.set_caption("reward:" + str(self._get_reward()))
+
+        return img
 
     def _onclick(self, event):
         # secretly flip x and y because we havent cared to do it correctly in the environment
@@ -104,7 +120,6 @@ class MinesweeperEnv(gym.Env):
         current_action = y * self.width + x
         self.step(current_action)
         self.render(mode="human")
-
 
     def close(self):
         pass
@@ -179,11 +194,15 @@ class MinesweeperEnv(gym.Env):
                 mine_count += 1
         return mine_count
 
-    def _get_info(self):
+    def _get_info(self, prev_game_over, action):
         return {
             "opened cells": np.count_nonzero(self.open_cells),
             "steps": self.steps,
-            "unnecessary steps": self.unnecessary_steps
+            "unnecessary steps": self.unnecessary_steps,
+            "game over": self._game_over(),
+            "died this turn": self._game_over() and not prev_game_over,
+            "mine locations": self.mines,
+            "opened cell": self._parse_action(action)
         }
 
 
