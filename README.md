@@ -1,4 +1,4 @@
-# gym-minesweeper
+# ![flag](https://i.imgur.com/YnpGd36.png) gym-minesweeper
 An OpenAI gym environment for MineSweeper
 
 ## Reward
@@ -48,7 +48,7 @@ env.render("terminal")
 . . . . . . . . 
 ```
 
-the info returned by`env.step(action)` contains useful info, like the amount of opened cells, 
+The info returned by`env.step(action)` contains useful info, like the amount of opened cells and mine locations.
 
 ```python
 output.info
