@@ -102,8 +102,9 @@ class MinesweeperEnv(gym.Env):
                self._get_observation()]
 
         if mode == 'human':
+            self.window.set_caption(
+                "reward:" + str(np.round(self._get_reward(), 4)))
             self.window.show_img(img)
-            self.window.set_caption("reward:" + str(self._get_reward()))
 
         return img
 
@@ -117,7 +118,8 @@ class MinesweeperEnv(gym.Env):
         self.render(mode="human")
 
     def close(self):
-        pass
+        if self.window:
+            self.window.close()
 
     def _parse_action(self, action):
         x = action % self.width
