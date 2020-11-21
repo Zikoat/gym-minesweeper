@@ -1,12 +1,12 @@
 import random
-
 import gym
 import numpy as np
+
 
 class MinesweeperEnv(gym.Env):
 
     def __init__(self, width=8, height=8, mine_count=10, flood_fill=True,
-                 debug=False, punishment=0):
+                 debug=False, punishment=0.01):
         self.width = width
         self.height = height
         self.mines_count = mine_count
@@ -60,7 +60,7 @@ class MinesweeperEnv(gym.Env):
 
     def reset(self):
         self.observation_space = gym.spaces.Box(-2, 8,
-                                            shape=(self.width, self.height))
+                                                shape=(self.width, self.height))
         self.action_space = gym.spaces.Discrete(self.width * self.height)
 
         self.open_cells = np.zeros((self.width, self.height))
@@ -73,7 +73,7 @@ class MinesweeperEnv(gym.Env):
                           (-1, 1), (0, 1), (1, 1)]
         return self._get_observation()
 
-    def render(self, mode='human', close=False):
+    def render(self, mode='human'):
         if mode == "terminal":
             print()
             for row in self._get_observation():
@@ -92,19 +92,14 @@ class MinesweeperEnv(gym.Env):
                 print(rowstring)
             print()
 
-        if close:
-            if self.window:
-                self.window.close()
-            return
-
         if mode == 'human' and not self.window:
-            img = self.render(mode="rgb_array")
             from gym_minigrid.window import Window
             self.window = Window('gym_minigrid')
             self.window.reg_event("button_press_event", self._onclick)
-            self.window.show(block=False)
+            self.window.show(block=True)
 
-        img = [[COLORS[cell] for cell in row] for row in self._get_observation()]
+        img = [[COLORS[cell] for cell in row] for row in
+               self._get_observation()]
 
         if mode == 'human':
             self.window.show_img(img)
@@ -140,18 +135,20 @@ class MinesweeperEnv(gym.Env):
                 for dx, dy in self.NEIGHBORS:
                     ix, iy = (dx + x, dy + y)
                     if 0 <= ix <= self.width - 1 \
-                            and 0 <= iy <= self.height - 1 \
-                            and not self.open_cells[ix, iy]:
-                        # self.open_cells[ix, iy] = 1
-                        if self._get_neighbor_mines(ix, iy) == 0:
+                            and 0 <= iy <= self.height - 1:
+                    # self.open_cells[ix, iy] = 1
+                        if self._get_neighbor_mines(ix, iy) == 0 and not self.open_cells[ix, iy]:
+
                             self._open_cell(ix, iy)
+                        else:
+                            self.open_cells[ix, iy] = 1
+
 
     def _get_reward(self):
         openable = self.width * self.height - self.mines_count
         open = np.count_nonzero(self.open_cells)
-        return open / openable - \
-               (
-                       self.steps - self.unnecessary_steps) * self.punishment / openable
+        open_mines = np.count_nonzero(np.logical_and(self.open_cells, self.mines))
+        return (open - self.unnecessary_steps * self.punishment) / openable - open_mines
 
     def _generate_mines(self, width, height, bombs):
         mines = np.zeros((width, height))
@@ -201,7 +198,7 @@ class MinesweeperEnv(gym.Env):
             "unnecessary steps": self.unnecessary_steps,
             "game over": self._game_over(),
             "died this turn": self._game_over() and not prev_game_over,
-            "mine locations": self.mines,
+            "mine locations": self.mines.astype(int),
             "opened cell": self._parse_action(action)
         }
 
