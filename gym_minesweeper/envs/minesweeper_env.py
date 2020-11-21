@@ -11,7 +11,13 @@ from gym.utils import seeding
 
 class MinesweeperEnv(gym.Env):
 
-    def __init__(self, width=8, height=8, bombs=10):
+    def __init__(self, width=8, height=8, bombs=10, debug=False):
+        self.width = width
+        self.height = height
+        self.bombs = bombs
+        self.debug = debug
+
+        self.observation_space = spaces.Box(-2, 8, shape=(width, height))
         self.action_space = spaces.Discrete(width * height)
         self.open_cells = np.zeros((width, height))
         self.mines = self._generate_mines(width, height, bombs)
@@ -46,15 +52,19 @@ class MinesweeperEnv(gym.Env):
                  However, official evaluations of your agent are not allowed to
                  use this for learning.
         """
-        x, y = self._parse_action()
+        x, y = self._parse_action(action)
         self._open_cell(x, y)
         reward = self._get_reward()
         observation = self._get_observation()
-        episode_over = self._game_over
+        episode_over = self._game_over()
+        if self.debug:
+            print("the game is {} over".format("" if episode_over else "not"))
         return observation, reward, episode_over, {}
 
     def reset(self):
-        pass
+        self.open_cells = np.zeros((self.width, self.height))
+        self.mines = self._generate_mines(self.width, self.height, self.bombs)
+        return self._get_observation()
 
     def render(self, mode='human'):
         pass
@@ -62,8 +72,12 @@ class MinesweeperEnv(gym.Env):
     def close(self):
         pass
 
-    def _parse_action(self):
-        return 3, 3;
+    def _parse_action(self, action):
+
+        x =  action%self.width
+        y =  action//self.height
+        print("action is ({},{})".format(x,y))
+        return x, y
 
     def _open_cell(self, x, y):
         self.open_cells[x, y] = 1
@@ -88,7 +102,6 @@ class MinesweeperEnv(gym.Env):
         for ix, iy in np.ndindex(self.open_cells.shape):
             open = self.open_cells[ix, iy]
             mine = self.mines[ix, iy]
-            print("({},{}) open:{}, mine:{}".format(ix, iy, open, mine))
 
             if not open:
                 observation[ix, iy] = -1
@@ -97,15 +110,22 @@ class MinesweeperEnv(gym.Env):
             elif open:
                 observation[ix, iy] = self._get_neighbor_mines(ix, iy)
 
+            if self.debug:
+                print("({},{}) open:{}, mine:{}, observation:{}".format(ix, iy, open, mine, observation[ix, iy]))
 
-        return "shit"
+        return observation
 
     def _game_over(self):
-        return np.any(np.logical_and(self.open_cells, self.mines))
+
+        logical_and = np.logical_and(self.open_cells, self.mines)
+        if self.debug:
+            print("logical and", logical_and)
+        return np.any(logical_and)
 
     def _get_neighbor_mines(self, x, y):
-        return self.mines[x-1, y-1] + self.mines[x, y-1] + self.mines[x+1, y-1] + \
-               self.mines[x-1, y  ] + self.mines[x, y  ] + self.mines[x+1, y  ] + \
-               self.mines[x-1, y+1] + self.mines[x, y+1] + self.mines[x+1, y+1]
-
-    
+        neighbors = [(x-1,y-1),(x,y-1),(x+1,y-1),(x-1,y),(x+1,y),(x-1,y+1),(x,y+1),(x+1,y+1)]
+        mine_count = 0
+        for ix, iy  in neighbors:
+            if ix>=0 and ix<=self.width and iy>=0 and iy<=self.height:
+                mine_count += 1
+        return mine_count
