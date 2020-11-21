@@ -8,3 +8,4 @@ git clone
 
 cd gym-minesweeper
 pip install -e .
+it

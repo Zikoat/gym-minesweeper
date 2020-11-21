@@ -1,0 +1,3 @@
+from gym_minesweeper.envs.soccer_env import SoccerEnv
+from gym_minesweeper.envs.soccer_empty_goal import SoccerEmptyGoalEnv
+from gym_minesweeper.envs.soccer_against_keeper import SoccerAgainstKeeperEnv
