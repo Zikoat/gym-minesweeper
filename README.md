@@ -32,7 +32,10 @@ env.render()
 ```
 
 `env.render()` creates an interactive matplotlib window where you can click with
-your mouse to open cells. Alternatively, use `env.render("terminal")` to print
+your mouse to open cells. 
+![board](./board.png)
+
+Alternatively, use `env.render("terminal")` to print
 the board as ASCI:
 
 ```python
