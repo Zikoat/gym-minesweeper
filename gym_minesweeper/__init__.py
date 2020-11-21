@@ -16,7 +16,7 @@ register(
 )
 
 register(
-    id='MinesweeperMedium-v0',
+    id='MinesweeperHard-v0',
     entry_point='gym.envs:MinesweeperHardEnv',
     nondeterministic=False,
 )
