@@ -1,15 +1,16 @@
 import logging
 import math
-from gym_soccer.envs.soccer_env import SoccerEnv
+from gym_minesweeper.envs.minesweeper_env import MinesweeperEnv
 
 try:
     import hfo_py
 except ImportError as e:
-    raise error.DependencyNotInstalled("{}. (HINT: you can install HFO dependencies with 'pip install gym[soccer].)'".format(e))
+    raise e.DependencyNotInstalled("{}. (HINT: you can install HFO "
+                                   "dependencies with 'pip install gym[soccer].)'".format(e))
 
 logger = logging.getLogger(__name__)
 
-class SoccerEmptyGoalEnv(SoccerEnv):
+class MinesweeperMediumEnv(MinesweeperEnv):
     """
     SoccerEmptyGoal tasks the agent with approaching the ball,
     dribbling, and scoring a goal. Rewards are given as the agent nears
