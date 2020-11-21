@@ -11,11 +11,11 @@ from gym.utils import seeding
 
 class MinesweeperEnv(gym.Env):
 
-    def __init__(self, width=8, height=8, mines=10, flood_fill=True,
+    def __init__(self, width=8, height=8, mine_count=10, flood_fill=True,
                  debug=False, punishment=0):
         self.width = width
         self.height = height
-        self.mines = mines
+        self.mines_count = mine_count
         self.debug = debug
         self.flood_fill = flood_fill
         self.punishment = punishment
@@ -64,18 +64,36 @@ class MinesweeperEnv(gym.Env):
         self.action_space = spaces.Discrete(self.width * self.height)
 
         self.open_cells = np.zeros((self.width, self.height))
-        self.mines = self._generate_mines(self.width, self.height, self.mines)
+        self.mines = self._generate_mines(self.width, self.height, self.mines_count)
         self.steps = 0
         self.unnecessary_steps = 0
         self.NEIGHBORS = [(-1, -1), (0, -1), (1, -1),
                           (-1, 0), (1, 0),
                           (-1, 1), (0, 1), (1, 1)]
-
-        print(self.mines)
         return self._get_observation()
 
     def render(self, mode='human'):
-        pass
+        if mode == "terminal":
+            print("-------")
+            for row in self._get_observation():
+                rowstring = ""
+                for cell in row:
+                    if cell == -1:
+                        character = "."
+                    elif cell == 0:
+                        character = " "
+                    elif cell == -2:
+                        character = "X"
+                    else:
+                        character = str(int(cell))
+
+                    rowstring += character + " "
+                print(rowstring)
+            print("-------")
+
+        if mode == "human":
+            self.window.update()
+
 
     def close(self):
         pass
@@ -101,7 +119,7 @@ class MinesweeperEnv(gym.Env):
                             self._open_cell(ix, iy)
 
     def _get_reward(self):
-        openable = self.width * self.height - self.mines
+        openable = self.width * self.height - self.mines_count
         open = np.count_nonzero(self.open_cells)
         return open / openable - \
                (self.steps - self.unnecessary_steps) * self.punishment / openable
