@@ -1,14 +1,18 @@
 # ![flag](https://i.imgur.com/YnpGd36.png) gym-minesweeper
 An OpenAI gym environment for MineSweeper
 
+Note that this is still in version 0 and breaking changes will be introduced.
+
 ## Reward
 The reward is the amount of cells opened. A perfect game gets a score of 1, and an opened mine subtracts 1 score, while pressing a cell that has no effect gives a small penalty. 
 
 ## Features
 - [x] flooding
 - [x] human interactivity
+
 - [ ] medium and hard difficulty
 - [ ] gridworld navigation and exploration (for large boards)
+- [ ] Seeding
 - [ ] chording (not planned)
 - [ ] flagging (not planned)
 
