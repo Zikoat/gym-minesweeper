@@ -93,7 +93,8 @@ class MinesweeperEnv(gym.Env):
             print()
 
         if mode == 'human' and not self.window:
-            from gym_minigrid.window import Window
+            from gym_minesweeper.window import Window
+            print("Showing MineSweeper board in own window.\nPyCharm users might want to disable \"Show plots in tool window\".")
             self.window = Window('gym_minigrid')
             self.window.reg_event("button_press_event", self._onclick)
             self.window.show(block=True)

@@ -8,9 +8,12 @@ import numpy as np
 # Only ask users to install matplotlib if they actually need it
 try:
     import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.use('tkagg')
 except:
     print('To display the environment in a window, please install matplotlib, eg:')
     print('pip3 install --user matplotlib')
+    print('To show in the terminal use env.render(\"terminal\") or env.render(\"rgb-array\").')
     sys.exit(-1)
 
 class Window:
