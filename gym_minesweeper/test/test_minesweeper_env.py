@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase,skip
 import gym
 import gym_minesweeper
 import numpy as np
@@ -17,24 +17,26 @@ class TestMinesweeperEnv(TestCase):
 
         self.assertEqual(np.array(ob).shape, (8, 8))
         if episode_over:
-            self.assertEqual(reward, -1)
-            self.assertFalse(info["game over"])
+            self.assertLess(reward, 0)
+            self.assertTrue(info["game over"])
             self.assertTrue(info["died this turn"])
-            self.assertEqual(info["mine locations"].shape, ob.shape)
         else:
             self.assertGreater(reward, 0)
 
+        self.assertEqual(info["mine locations"].shape, ob.shape)
         self.assertGreaterEqual(info["opened cells"], 1)
         self.assertEqual(info["unnecessary steps"], 0)
         self.assertEqual(len(info["opened cell"]), len(ob.shape))
 
+    @skip("Opens window")
     def test_render_human(self):
+        self.env.step(self.env.action_space.sample())
         self.env.render("human")
 
     def test_render_terminal(self):
-        self.skipTest("not implemented")
-        self.fail()
+        self.env.step(self.env.action_space.sample())
+        self.env.render("terminal")
 
     def test_render_rgb_array(self):
-        self.skipTest("not implemented")
-        self.fail()
+        self.env.step(self.env.action_space.sample())
+        self.assertEqual(np.array(self.env.render("rgb-array")).shape, (8, 8, 3))
