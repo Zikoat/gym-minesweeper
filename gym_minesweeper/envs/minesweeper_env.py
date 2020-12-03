@@ -59,7 +59,8 @@ class MinesweeperEnv(gym.Env):
         return observation, reward, done, self._get_info(prev_game_over, action)
 
     def reset(self):
-        self.observation_space = gym.spaces.Box(-2, 8,
+        self.observation_space = gym.spaces.Box(low=np.float32(-2),
+                                                high=np.float32(8),
                                                 shape=(self.width, self.height))
         self.action_space = gym.spaces.Discrete(self.width * self.height)
 

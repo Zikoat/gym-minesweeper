@@ -15,7 +15,8 @@ class TestMinesweeperEnv(TestCase):
     def test_step(self):
         ob, reward, episode_over, info = self.env.step(self.env.action_space.sample())
 
-        self.assertEqual(np.array(ob).shape, (8, 8))
+        self.assertEqual(ob.shape, (8, 8))
+        self.assertEqual(ob.shape, self.env.observation_space.shape)
         if episode_over:
             self.assertLess(reward, 0)
             self.assertTrue(info["game over"])
