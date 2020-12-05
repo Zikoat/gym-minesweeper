@@ -13,7 +13,21 @@ class MinesweeperEnv(gym.Env):
         self.debug = debug
         self.flood_fill = flood_fill
         self.punishment = punishment
+
         self.window = None
+        self.observation_space = gym.spaces.Box(low=np.float32(-2),
+                                                high=np.float32(8),
+                                                shape=(self.width, self.height))
+        self.action_space = gym.spaces.Discrete(self.width * self.height)
+        self.NEIGHBORS = [(-1, -1), (0, -1), (1, -1),
+                          (-1, 0), (1, 0),
+                          (-1, 1), (0, 1), (1, 1)]
+        self.open_cells = np.zeros((self.width, self.height))
+        self.mines = self._generate_mines(self.width, self.height,
+                                          self.mines_count)
+        self.steps = 0
+        self.unnecessary_steps = 0
+
 
     def step(self, action):
         """
@@ -59,19 +73,11 @@ class MinesweeperEnv(gym.Env):
         return observation, reward, done, self._get_info(prev_game_over, action)
 
     def reset(self):
-        self.observation_space = gym.spaces.Box(low=np.float32(-2),
-                                                high=np.float32(8),
-                                                shape=(self.width, self.height))
-        self.action_space = gym.spaces.Discrete(self.width * self.height)
-
         self.open_cells = np.zeros((self.width, self.height))
         self.mines = self._generate_mines(self.width, self.height,
                                           self.mines_count)
         self.steps = 0
         self.unnecessary_steps = 0
-        self.NEIGHBORS = [(-1, -1), (0, -1), (1, -1),
-                          (-1, 0), (1, 0),
-                          (-1, 1), (0, 1), (1, 1)]
         return self._get_observation()
 
     def render(self, mode='human'):
