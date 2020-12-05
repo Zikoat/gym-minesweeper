@@ -41,3 +41,20 @@ class TestMinesweeperEnv(TestCase):
     def test_render_rgb_array(self):
         self.env.step(self.env.action_space.sample())
         self.assertEqual(np.array(self.env.render("rgb-array")).shape, (8, 8, 3))
+
+    def test_create_probability_matrix_from_solution(self):
+        env = gym.make("Minesweeper-v0", width=3, height=2, mine_count=1)
+        env.reset()
+
+        # Remove all the mines
+        env.mines = np.zeros((env.width, env.height))
+        # Plant a mine in the bottom middle cell
+        env.mines[1, 1] = 1
+
+        # Open top middle cell
+        env.step(1)
+        # Open top right cell
+        env.step(2)
+
+        self.assertEqual(env.render("ansi"), "x11\nxxx")
+

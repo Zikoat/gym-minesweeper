@@ -116,8 +116,6 @@ class MinesweeperEnv(gym.Env):
         return img
 
     def _onclick(self, event):
-        # secretly flip x and y because we havent cared to do it correctly in the environment
-        # todo fix x and y order
         x = round(event.ydata)
         y = round(event.xdata)
         current_action = y * self.width + x
@@ -130,7 +128,7 @@ class MinesweeperEnv(gym.Env):
 
     def _parse_action(self, action):
         x = action % self.width
-        y = action // self.height
+        y = action // self.width
         return x, y
 
     def _open_cell(self, x, y):
@@ -165,8 +163,11 @@ class MinesweeperEnv(gym.Env):
 
         for coord in mines1d:
             x = coord % width
-            y = coord // height
-            mines[x, y] = 1
+            y = coord // width
+            try:
+                mines[x, y] = 1
+            except:
+                raise
 
         return mines
 
