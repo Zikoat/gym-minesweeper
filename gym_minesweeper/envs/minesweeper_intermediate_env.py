@@ -5,7 +5,7 @@ from gym_minesweeper.envs.minesweeper_env import MinesweeperEnv
 logger = logging.getLogger(__name__)
 
 class MinesweeperIntermediateEnv(MinesweeperEnv):
-    """
+    """ todo create intermediate environment
     SoccerEmptyGoal tasks the agent with approaching the ball,
     dribbling, and scoring a goal. Rewards are given as the agent nears
     the ball, kicks the ball towards the goal, and scores a goal.

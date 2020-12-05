@@ -13,7 +13,7 @@ try:
 except:
     print('To display the environment in a window, please install matplotlib, eg:')
     print('pip3 install --user matplotlib')
-    print('To show in the terminal use env.render(\"terminal\") or env.render(\"rgb-array\").')
+    print('To show in the terminal use env.render(\"ansi\") or env.render(\"rgb_array\").')
     sys.exit(-1)
 
 class Window:

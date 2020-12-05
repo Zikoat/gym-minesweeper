@@ -34,13 +34,13 @@ class TestMinesweeperEnv(TestCase):
         self.env.step(self.env.action_space.sample())
         self.env.render("human")
 
-    def test_render_terminal(self):
+    def test_render_ansi(self):
         self.env.step(self.env.action_space.sample())
-        self.env.render("terminal")
+        print(self.env.render("ansi"))
 
     def test_render_rgb_array(self):
         self.env.step(self.env.action_space.sample())
-        self.assertEqual(np.array(self.env.render("rgb-array")).shape, (8, 8, 3))
+        self.assertEqual(np.array(self.env.render("rgb_array")).shape, (8, 8, 3))
 
     def test_create_probability_matrix_from_solution(self):
         env = gym.make("Minesweeper-v0", width=3, height=2, mine_count=1)

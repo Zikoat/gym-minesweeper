@@ -39,11 +39,11 @@ env.render()
 your mouse to open cells. 
 ![board](./board.png)
 
-Alternatively, use `env.render("terminal")` to print
-the board as ASCI:
+Alternatively, use `env.render("ansi")` to print
+the board to the terminal:
 
 ```python
-env.render("terminal")
+print(env.render("ansi"))
 
 . . . . . 1     
 . . . . . 1     

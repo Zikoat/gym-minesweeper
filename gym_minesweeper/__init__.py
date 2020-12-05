@@ -6,11 +6,11 @@ logger = logging.getLogger(__name__)
 register(
     id='Minesweeper-v0',
     entry_point='gym_minesweeper.envs:MinesweeperEnv',
-    nondeterministic=False,  # todo: figure out what this setting does
+    nondeterministic=True,  # todo seeding
 )
 
 register(
     id='MinesweeperHard-v0',
     entry_point='gym.envs:MinesweeperHardEnv',
-    nondeterministic=False,
+    nondeterministic=True,
 )

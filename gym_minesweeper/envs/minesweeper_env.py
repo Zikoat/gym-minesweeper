@@ -4,6 +4,8 @@ import numpy as np
 
 
 class MinesweeperEnv(gym.Env):
+    metadata = {'render.modes': ["ansi", "rgb_array", "human"]}
+    reward_range = (-float(1), float(1))
 
     def __init__(self, width=8, height=8, mine_count=10, flood_fill=True,
                  debug=False, punishment=0.01):
@@ -27,7 +29,6 @@ class MinesweeperEnv(gym.Env):
                                           self.mines_count)
         self.steps = 0
         self.unnecessary_steps = 0
-
 
     def step(self, action):
         """
@@ -81,9 +82,10 @@ class MinesweeperEnv(gym.Env):
         return self._get_observation()
 
     def render(self, mode='human'):
-        if mode == "terminal":
-            ascii_board = ""
+        if mode == "ansi":
+            row_strings = []
             for row in self._get_observation().T:
+                row_string = ""
                 for cell in row:
                     if cell == -1:
                         character = "x"
@@ -94,26 +96,32 @@ class MinesweeperEnv(gym.Env):
                     else:
                         character = str(int(cell))
 
-                    ascii_board += character
-                ascii_board += "\n"
-            return ascii_board
+                    row_string += character
+                row_strings.append(row_string)
+            return "\n".join(row_strings)
 
-        if mode == 'human' and not self.window:
+        elif mode == 'human' and not self.window:
             from gym_minesweeper.window import Window
             print("Showing MineSweeper board in own window.\nPyCharm users might want to disable \"Show plots in tool window\".")
             self.window = Window('gym_minigrid')
             self.window.reg_event("button_press_event", self._onclick)
             self.window.show(block=True)
 
-        img = [[COLORS[cell] for cell in row] for row in
-               self._get_observation()]
+        elif mode == 'human':
+            img = [[COLORS[cell] for cell in row] for row in
+                   self._get_observation()]
 
-        if mode == 'human':
             self.window.set_caption(
                 "reward:" + str(np.round(self._get_reward(), 4)))
             self.window.show_img(img)
+            return img
 
-        return img
+        elif mode == "rgb_array":
+            img = [[COLORS[cell] for cell in row] for row in
+                   self._get_observation()]
+            return img
+        else:
+            print("Did not understand rendering mode. use mode=")
 
     def _onclick(self, event):
         x = round(event.ydata)
