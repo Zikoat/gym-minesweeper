@@ -82,22 +82,21 @@ class MinesweeperEnv(gym.Env):
 
     def render(self, mode='human'):
         if mode == "terminal":
-            print()
-            for row in self._get_observation():
-                rowstring = ""
+            ascii_board = ""
+            for row in self._get_observation().T:
                 for cell in row:
                     if cell == -1:
-                        character = "."
+                        character = "x"
                     elif cell == 0:
-                        character = " "
+                        character = "."
                     elif cell == -2:
-                        character = "X"
+                        character = "B"
                     else:
                         character = str(int(cell))
 
-                    rowstring += character + " "
-                print(rowstring)
-            print()
+                    ascii_board += character
+                ascii_board += "\n"
+            return ascii_board
 
         if mode == 'human' and not self.window:
             from gym_minesweeper.window import Window
