@@ -10,12 +10,6 @@ register(
 )
 
 register(
-    id='MinesweeperMedium-v0',
-    entry_point='gym_soccer.envs:MinesweeperMediumEnv',
-    nondeterministic=False,
-)
-
-register(
     id='MinesweeperHard-v0',
     entry_point='gym.envs:MinesweeperHardEnv',
     nondeterministic=False,
