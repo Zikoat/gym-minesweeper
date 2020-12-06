@@ -40,7 +40,10 @@ class TestMinesweeperEnv(TestCase):
 
     def test_render_rgb_array(self):
         self.env.step(self.env.action_space.sample())
-        self.assertEqual(np.array(self.env.render("rgb_array")).shape, (8, 8, 3))
+        img = self.env.render("rgb_array")
+        self.assertEqual(img.shape[2], 3)
+        print(img.shape)
+        print(img)
 
     def test_create_probability_matrix_from_solution(self):
         env = gym.make("Minesweeper-v0", width=3, height=2, mine_count=1)

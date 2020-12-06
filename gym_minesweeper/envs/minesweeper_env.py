@@ -1,4 +1,6 @@
 import random
+
+import cv2
 import gym
 import numpy as np
 
@@ -35,27 +37,47 @@ class MinesweeperEnv(gym.Env):
 
         Parameters
         ----------
-        action :
+        action (int) :
+            A z-order zero-based index indicating which cell to dig.
+            If the board is of width 5 and height 2, an action of 0 means the
+            upper left corner, 4 means the upper right corner, 5 is the lower
+            left corner and 9 is the lower right corner.
+
+            The actual cells that change are determined by standard minesweeper
+            rules, eg. if you open a cell with 0 mines around it, a larger space
+            will be opened.
 
         Returns
         -------
         ob, reward, episode_over, info : tuple
-            ob (object) :
-                an environment-specific object representing your observation of
-                the environment.
+            ob (np.ndarray) :
+                An int array of shape (width, height) with integer values
+                ranging from -2 to 8 where
+                -2 = opened mine
+                -1 = closed cell
+                0-8 = Amount of mines in the surrounding cells
             reward (float) :
-                varies between environments, but the goal is always to increase
-                your total reward.
+                A value between -1 and 1. Increases from 0 to 1 while the game
+                is played based on how many cells have been opened.
+                Pressing on a mine reduces the reward to the range -1 to 0.
+                Playing a perfect game gives a reward of 1.
+                Pressing on an already-opened cell decreases the score by
+                self.punishment (default 0.01).
             episode_over (bool) :
-                whether it's time to reset the environment again. Most (but not
-                all) tasks are divided up into well-defined episodes, and done
-                being True indicates the episode has terminated. (For example,
-                perhaps the pole tipped too far, or you lost your last life.)
+                If a mine has been pressed. If reset() is not called, you could
+                theoretically continue playing, but this is not advised.
             info (dict) :
-                 diagnostic information useful for debugging. It can sometimes
-                 be useful for learning (for example, it might contain the raw
-                 probabilities behind the environment's last state change).
-                 However, official evaluations of your agent are not allowed to
+                 diagnostic information useful for debugging.
+                 Includes:
+                    opened cells: Amount of opened cells. Affects reward.
+                    steps: The amount of steps taken in this episode.
+                    unnecessary steps: The amount of steps that had no effect.
+                    game over: If a mine has been opened
+                    died this turn: If a mine has been opened this turn.
+                    mine locations: The location of all the mines.
+                    opened cell: The (x, y) coordinates of the cell that was
+                        opened this step.
+                 Official evaluations of your agent are not allowed to
                  use this for learning.
         """
         prev_game_over = self._game_over()
@@ -114,14 +136,16 @@ class MinesweeperEnv(gym.Env):
             self.window.set_caption(
                 "reward:" + str(np.round(self._get_reward(), 4)))
             self.window.show_img(img)
-            return img
 
         elif mode == "rgb_array":
             img = [[COLORS[cell] for cell in row] for row in
                    self._get_observation()]
+            img = np.array(img, dtype=np.uint8)
+            zoom = 20
+            img = cv2.resize(img, dsize=(0,0), fx=zoom, fy=zoom, interpolation=cv2.INTER_NEAREST)
             return img
         else:
-            print("Did not understand rendering mode. use mode=")
+            print("Did not understand rendering mode. Use any of mode=", self.metadata["render.modes"])
 
     def _onclick(self, event):
         x = round(event.ydata)
