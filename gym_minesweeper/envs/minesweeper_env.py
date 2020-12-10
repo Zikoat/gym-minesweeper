@@ -108,9 +108,13 @@ class MinesweeperEnv(gym.Env):
                                           self.mines_count)
         self.steps = 0
         self.unnecessary_steps = 0
+        if self.debug:
+            self._assert_invariants()
         return self._get_observation()
 
     def render(self, mode='human'):
+        if self.debug:
+            self._assert_invariants()
         if mode == "ansi":
             row_strings = []
             for row in self._get_observation().T:
