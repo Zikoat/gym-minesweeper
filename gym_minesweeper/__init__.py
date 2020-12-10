@@ -16,11 +16,11 @@ for env in registration.registry.env_specs.copy():
 registration.register(
     id='Minesweeper-v0',
     entry_point='gym_minesweeper.envs:MinesweeperEnv',
-    nondeterministic=True,  # todo seeding
+    nondeterministic=False,
 )
 
 registration.register(
     id='MinesweeperHard-v0',
     entry_point='gym.envs:MinesweeperHardEnv',
-    nondeterministic=True,
+    nondeterministic=False,
 )
