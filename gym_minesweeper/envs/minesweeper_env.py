@@ -10,7 +10,7 @@ class MinesweeperEnv(gym.Env):
     reward_range = (-float(1), float(1))
 
     def __init__(self, width=8, height=8, mine_count=10, flood_fill=True,
-                 debug=False, punishment=0.01):
+                 debug=True, punishment=0.01, seed=None):
         self.width = width
         self.height = height
         self.mines_count = mine_count
@@ -27,6 +27,7 @@ class MinesweeperEnv(gym.Env):
                           (-1, 0), (1, 0),
                           (-1, 1), (0, 1), (1, 1)]
         self.open_cells = np.zeros((self.width, self.height))
+        random.seed(a=seed)
         self.mines = self._generate_mines(self.width, self.height,
                                           self.mines_count)
         self.steps = 0
@@ -195,9 +196,10 @@ class MinesweeperEnv(gym.Env):
         open_mines = np.count_nonzero(np.logical_and(self.open_cells, self.mines))
         return (open - self.unnecessary_steps * self.punishment) / openable - open_mines
 
-    def _generate_mines(self, width, height, bombs):
+    def _generate_mines(self, width, height, mine_count):
         mines = np.zeros((width, height))
-        mines1d = random.sample(range(width * height), bombs)
+        print("using seed")
+        mines1d = random.sample(range(width * height), mine_count)
 
         for coord in mines1d:
             x = coord % width
