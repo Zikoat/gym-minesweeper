@@ -24,7 +24,7 @@ class MinesweeperEnv(gym.Env):
                                                 shape=(self.width, self.height))
         self.action_space = gym.spaces.Discrete(self.width * self.height)
         self.NEIGHBORS = [(-1, -1), (0, -1), (1, -1),
-                          (-1, 0), (1, 0),
+                          (-1, 0), (0, 0), (1, 0),
                           (-1, 1), (0, 1), (1, 1)]
         self.open_cells = np.zeros((self.width, self.height))
         random.seed(a=seed)
