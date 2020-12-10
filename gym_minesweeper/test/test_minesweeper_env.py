@@ -61,3 +61,48 @@ class TestMinesweeperEnv(TestCase):
 
         self.assertEqual(env.render("ansi"), "x11\nxxx")
 
+    def test_seed(self):
+        env = gym.make("Minesweeper-v0", seed=0)
+        ob, reward, episode_over, info = env.step(1)
+
+        expected_mine_locations = np.array([[0,0,1,0,1,0,1,1,],
+                                             [0,0,0,1,0,0,1,0,],
+                                             [1,0,0,1,0,0,1,0,],
+                                             [0,0,0,0,0,0,0,0,],
+                                             [0,0,0,0,0,0,0,0,],
+                                             [0,0,0,0,0,0,0,0,],
+                                             [0,0,0,0,0,0,0,0,],
+                                             [0,0,0,1,0,0,0,0,]])
+
+        np.testing.assert_array_equal(info["mine locations"], expected_mine_locations)
+
+    def test_seeded_reset_changes_locations(self):
+        env = gym.make("Minesweeper-v0", seed=0)
+        state = env.step(38)
+        mine_locations_1 = state[3]["mine locations"]
+        env.reset()
+        state = env.step(38)
+        mine_locations_2 = state[3]["mine locations"]
+        self.assertFalse(np.array_equal(mine_locations_1, mine_locations_2))
+
+    def test_first_open_is_mine(self):
+        env = gym.make("Minesweeper-v0", seed=0)
+        ob, reward, episode_over, info = env.step(31)
+        print(info["mine locations"])
+        print(env.render("ansi"))
+        print(info["opened cell"])
+        self.assertTrue(episode_over)
+
+        self.assertEquals(reward, -1)
+        self.assertIn(-2, ob)
+        self.assertTrue(info["died this turn"])
+        self.assertEqual(1, info["steps"])
+        self.assertEqual(1, info["opened cells"])
+
+    def test_reset_returns_observation(self):
+        observation_reset = self.env.reset()
+        observation_step = self.env.step(self.env.action_space.sample())[0]
+        expected_observation = np.full((self.env.width, self.env.height), -1)
+
+        self.assertEqual(observation_reset.shape, observation_step.shape)
+        self.assertTrue(np.array_equal(expected_observation, observation_reset))
