@@ -32,6 +32,9 @@ class MinesweeperEnv(gym.Env):
         self.steps = 0
         self.unnecessary_steps = 0
 
+        if self.debug:
+            self._assert_invariants()
+
     def step(self, action):
         """
 
@@ -88,10 +91,13 @@ class MinesweeperEnv(gym.Env):
 
         reward = self._get_reward()
         observation = self._get_observation()
-        done = self._game_over()
+        done = self._is_done()
 
         if self.debug and not prev_game_over and done:
             print("game over")
+
+        if self.debug:
+            self._assert_invariants()
 
         return observation, reward, done, self._get_info(prev_game_over, action)
 
@@ -243,6 +249,38 @@ class MinesweeperEnv(gym.Env):
             "mine locations": self.mines.astype(int),
             "opened cell": self._parse_action(action)
         }
+
+    def _assert_invariants(self):
+        assert self._get_observation().shape == self.observation_space.shape
+
+        if self._game_over():
+            assert -1 <= self._get_reward() < 0, \
+                "Game is over, but score is {}".format(self._get_reward())
+            assert np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 1, \
+                "Game is over, but opened cells is {}".format(np.count_nonzero(np.logical_and(self.open_cells, self.mines)))
+        else:
+            assert 0 <= self._get_reward() < 1, \
+                "Game is not over, but score is {}".format(self._get_reward())
+            assert np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 0, \
+                "Game is not over, but opened mines: {}".format(np.count_nonzero(np.logical_and(self.open_cells, self.mines)))
+
+        assert (np.count_nonzero(self.open_cells) == 1 and self._game_over()) \
+               == (self._get_reward() == -1), \
+            "Game over: {}, mines opened: {}, but score is {}".format(self._game_over(), np.count_nonzero(self.open_cells), self._get_reward())
+
+        assert (np.count_nonzero(self.open_cells) == self.width*self.height) \
+               == (self._get_reward() == 1), \
+            "The game is won ({}), and the score should be 1, but the score is {}".format(np.count_nonzero(self.open_cells) == self.width*self.height, self._get_reward())
+
+        assert (np.count_nonzero(self.open_cells) == 0) \
+               == (self._get_reward() == 0), \
+            "The game has just started, but the reward is not zero. reward:{}".format(self._get_reward())
+
+    def _is_done(self):
+        openable = self.width * self.height - self.mines_count
+        opened = np.count_nonzero(self.open_cells)
+        all_opened = opened == openable
+        return self._game_over() or all_opened
 
 
 COLORS = {
