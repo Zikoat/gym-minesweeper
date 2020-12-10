@@ -193,8 +193,9 @@ class MinesweeperEnv(gym.Env):
     def _get_reward(self):
         openable = self.width * self.height - self.mines_count
         open = np.count_nonzero(self.open_cells)
-        open_mines = np.count_nonzero(np.logical_and(self.open_cells, self.mines))
-        return (open - self.unnecessary_steps * self.punishment) / openable - open_mines
+        open_mine = self._game_over()
+        return (open - self.unnecessary_steps * self.punishment) / openable \
+               - open_mine - open_mine/openable
 
     def _generate_mines(self, width, height, mine_count):
         mines = np.zeros((width, height))
