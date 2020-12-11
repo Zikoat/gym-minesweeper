@@ -1,4 +1,4 @@
-from unittest import TestCase,skip
+from unittest import TestCase, skip
 import gym
 import gym_minesweeper
 import numpy as np
@@ -13,7 +13,8 @@ class TestMinesweeperEnv(TestCase):
         self.env.reset()
 
     def test_step(self):
-        ob, reward, episode_over, info = self.env.step(self.env.action_space.sample())
+        ob, reward, episode_over, info = self.env.step(
+            self.env.action_space.sample())
 
         self.assertEqual(ob.shape, (8, 8))
         self.assertEqual(ob.shape, self.env.observation_space.shape)
@@ -65,16 +66,19 @@ class TestMinesweeperEnv(TestCase):
         env = gym.make("Minesweeper-v0", seed=0)
         ob, reward, episode_over, info = env.step(1)
 
-        expected_mine_locations = np.array([[0,0,1,0,1,0,1,1,],
-                                             [0,0,0,1,0,0,1,0,],
-                                             [1,0,0,1,0,0,1,0,],
-                                             [0,0,0,0,0,0,0,0,],
-                                             [0,0,0,0,0,0,0,0,],
-                                             [0,0,0,0,0,0,0,0,],
-                                             [0,0,0,0,0,0,0,0,],
-                                             [0,0,0,1,0,0,0,0,]])
+        expected_mine_locations = np.array(
+            [[0, 0, 1, 0, 1, 0, 1, 1, ],
+             [0, 0, 0, 1, 0, 0, 1, 0, ],
+             [1, 0, 0, 1, 0, 0, 1, 0, ],
+             [0, 0, 0, 0, 0, 0, 0, 0, ],
+             [0, 0, 0, 0, 0, 0, 0, 0, ],
+             [0, 0, 0, 0, 0, 0, 0, 0, ],
+             [0, 0, 0, 0, 0, 0, 0, 0, ],
+             [0, 0, 0, 1, 0, 0, 0, 0, ]])
 
-        np.testing.assert_array_equal(info["mine locations"], expected_mine_locations)
+        np.testing.assert_array_equal(
+            info["mine locations"],
+            expected_mine_locations)
 
     def test_seeded_reset_changes_locations(self):
         env = gym.make("Minesweeper-v0", seed=0)
@@ -110,14 +114,16 @@ class TestMinesweeperEnv(TestCase):
     def test_legal_actions(self):
         prev_legal_actions = self.env.legal_actions()
         self.assertEqual(self.env.legal_actions().size, self.env.action_space.n)
-        ob, reward, episode_over, info = self.env.step(self.env.action_space.sample())
+        ob, reward, episode_over, info = self.env.step(
+            self.env.action_space.sample())
 
         current_legal_actions = self.env.legal_actions()
         print(current_legal_actions)
         self.assertLess(current_legal_actions.size, prev_legal_actions.size)
 
         while not episode_over:
-            ob, reward, episode_over, info = self.env.step(self.env.legal_actions()[0])
+            ob, reward, episode_over, info = self.env.step(
+                self.env.legal_actions()[0])
 
         self.assertTrue(self.env._is_done())
         self.assertEqual(0, info["unnecessary steps"])

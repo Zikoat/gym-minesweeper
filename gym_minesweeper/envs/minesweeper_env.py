@@ -28,8 +28,7 @@ class MinesweeperEnv(gym.Env):
                           (-1, 1), (0, 1), (1, 1)]
         self.open_cells = np.zeros((self.width, self.height))
         random.seed(a=seed)
-        self.mines = self._generate_mines(self.width, self.height,
-                                          self.mines_count)
+        self.mines = self._generate_mines()
         self.steps = 0
         self.unnecessary_steps = 0
 
@@ -104,8 +103,7 @@ class MinesweeperEnv(gym.Env):
 
     def reset(self):
         self.open_cells = np.zeros((self.width, self.height))
-        self.mines = self._generate_mines(self.width, self.height,
-                                          self.mines_count)
+        self.mines = self._generate_mines()
         self.steps = 0
         self.unnecessary_steps = 0
         if self.debug:
@@ -113,7 +111,7 @@ class MinesweeperEnv(gym.Env):
         return self._get_observation()
 
     def legal_actions(self):
-        return np.flatnonzero(((self.open_cells-1)*-1).T)
+        return np.flatnonzero(((self.open_cells - 1) * -1).T)
 
     def render(self, mode='human'):
         if self.debug:
@@ -138,7 +136,9 @@ class MinesweeperEnv(gym.Env):
 
         elif mode == 'human' and not self.window:
             from gym_minesweeper.window import Window
-            print("Showing MineSweeper board in own window.\nPyCharm users might want to disable \"Show plots in tool window\".")
+            print("Showing MineSweeper board in own window.\n"
+                  "PyCharm users might want to "
+                  "disable \"Show plots in tool window\".")
             self.window = Window('gym_minigrid')
             self.window.reg_event("button_press_event", self._onclick)
             self.window.show(block=True)
@@ -156,10 +156,12 @@ class MinesweeperEnv(gym.Env):
                    self._get_observation()]
             img = np.array(img, dtype=np.uint8)
             zoom = 20
-            img = cv2.resize(img, dsize=(0,0), fx=zoom, fy=zoom, interpolation=cv2.INTER_NEAREST)
+            img = cv2.resize(img, dsize=(0, 0), fx=zoom, fy=zoom,
+                             interpolation=cv2.INTER_NEAREST)
             return img
         else:
-            print("Did not understand rendering mode. Use any of mode=", self.metadata["render.modes"])
+            print("Did not understand rendering mode. Use any of mode=",
+                  self.metadata["render.modes"])
 
     def _onclick(self, event):
         x = round(event.ydata)
@@ -187,35 +189,33 @@ class MinesweeperEnv(gym.Env):
             if self._get_neighbor_mines(x, y) == 0 and self.flood_fill:
                 for dx, dy in self.NEIGHBORS:
                     ix, iy = (dx + x, dy + y)
-                    if 0 <= ix <= self.width - 1 \
-                            and 0 <= iy <= self.height - 1:
-                    # self.open_cells[ix, iy] = 1
-                        if self._get_neighbor_mines(ix, iy) == 0 and not self.open_cells[ix, iy]:
-
+                    if (0 <= ix <= self.width - 1 and
+                            0 <= iy <= self.height - 1):
+                        # self.open_cells[ix, iy] = 1
+                        if (self._get_neighbor_mines(ix, iy) == 0 and
+                                not self.open_cells[ix, iy]):
                             self._open_cell(ix, iy)
                         else:
                             self.open_cells[ix, iy] = 1
 
-
     def _get_reward(self):
         openable = self.width * self.height - self.mines_count
-        open = np.count_nonzero(self.open_cells)
+        open_cells = np.count_nonzero(self.open_cells)
         open_mine = self._game_over()
-        return (open - self.unnecessary_steps * self.punishment) / openable \
-               - open_mine - open_mine/openable
+        punishment = self.unnecessary_steps * self.punishment
+        open_cells_reward = (open_cells - punishment) / openable
+        return open_cells_reward - open_mine - open_mine / openable
 
-    def _generate_mines(self, width, height, mine_count):
-        mines = np.zeros((width, height))
+    def _generate_mines(self):
+        mines = np.zeros((self.width, self.height))
         print("using seed")
-        mines1d = random.sample(range(width * height), mine_count)
+        mines1d = random.sample(range(self.width * self.height),
+                                self.mines_count)
 
         for coord in mines1d:
-            x = coord % width
-            y = coord // width
-            try:
-                mines[x, y] = 1
-            except:
-                raise
+            x = coord % self.width
+            y = coord // self.width
+            mines[x, y] = 1
 
         return mines
 
@@ -223,14 +223,14 @@ class MinesweeperEnv(gym.Env):
         self.open_cells
         observation = np.zeros(self.open_cells.shape)
         for ix, iy in np.ndindex(self.open_cells.shape):
-            open = self.open_cells[ix, iy]
-            mine = self.mines[ix, iy]
+            is_open = self.open_cells[ix, iy]
+            is_mine = self.mines[ix, iy]
 
-            if not open:
+            if not is_open:
                 observation[ix, iy] = -1
-            elif open and mine:
+            elif is_open and is_mine:
                 observation[ix, iy] = -2
-            elif open:
+            elif is_open:
                 observation[ix, iy] = self._get_neighbor_mines(ix, iy)
 
         return observation
@@ -264,27 +264,52 @@ class MinesweeperEnv(gym.Env):
         assert self._get_observation().shape == self.observation_space.shape
 
         if self._game_over():
-            assert -1 <= self._get_reward() < 0, \
+            assert (
+                -1 <= self._get_reward() < 0,
                 "Game is over, but score is {}".format(self._get_reward())
-            assert np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 1, \
-                "Game is over, but opened cells is {}".format(np.count_nonzero(np.logical_and(self.open_cells, self.mines)))
+            )
+            assert (
+                np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 1,
+                "Game is over, but opened cells is {}".format(
+                    np.count_nonzero(np.logical_and(self.open_cells, self.mines))
+                )
+            )
         else:
-            assert 0 <= self._get_reward() < 1, \
-                "Game is not over, but score is {}".format(self._get_reward())
-            assert np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 0, \
-                "Game is not over, but opened mines: {}".format(np.count_nonzero(np.logical_and(self.open_cells, self.mines)))
+            assert (
+                0 <= self._get_reward() < 1,
+                "Game is not over, but score is {}".format(self._get_reward()))
+            assert (
+                np.count_nonzero(np.logical_and(self.open_cells, self.mines)) == 0,
+                "Game is not over, but opened mines: {}".format(
+                    np.count_nonzero(np.logical_and(self.open_cells, self.mines))
+                )
+            )
 
-        assert (np.count_nonzero(self.open_cells) == 1 and self._game_over()) \
-               == (self._get_reward() == -1), \
-            "Game over: {}, mines opened: {}, but score is {}".format(self._game_over(), np.count_nonzero(self.open_cells), self._get_reward())
+        assert (
+            (np.count_nonzero(self.open_cells) == 1 and self._game_over())
+            == (self._get_reward() == -1),
+            "Game over: {}, mines opened: {}, but score is {}".format(
+                self._game_over(), np.count_nonzero(self.open_cells),
+                self._get_reward()
+            )
+        )
 
-        assert (np.count_nonzero(self.open_cells) == self.width*self.height) \
-               == (self._get_reward() == 1), \
-            "The game is won ({}), and the score should be 1, but the score is {}".format(np.count_nonzero(self.open_cells) == self.width*self.height, self._get_reward())
+        assert (
+            (np.count_nonzero(self.open_cells) == self.width * self.height)
+            == (self._get_reward() == 1),
+            "The game is won ({}), and the score should be 1, "
+            "but the score is {}".format(
+                np.count_nonzero(self.open_cells) == self.width * self.height,
+                self._get_reward()
+            )
+        )
 
-        assert (np.count_nonzero(self.open_cells) == 0) \
-               == (self._get_reward() == 0), \
-            "The game has just started, but the reward is not zero. reward:{}".format(self._get_reward())
+        assert (
+            (np.count_nonzero(self.open_cells) == 0)
+            == (self._get_reward() == 0),
+            "The game has just started, but the reward is not zero. "
+            "reward:{}".format(self._get_reward())
+        )
 
     def _is_done(self):
         openable = self.width * self.height - self.mines_count

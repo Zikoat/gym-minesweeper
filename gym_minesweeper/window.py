@@ -9,12 +9,15 @@ import numpy as np
 try:
     import matplotlib.pyplot as plt
     import matplotlib
+
     matplotlib.use('tkagg')
 except:
-    print('To display the environment in a window, please install matplotlib, eg:')
-    print('pip3 install --user matplotlib')
-    print('To show in the terminal use env.render(\"ansi\") or env.render(\"rgb_array\").')
+    print('To display the environment in a window, please install matplotlib, '
+          'eg:pip3 install --user matplotlib.\n'
+          'To show in the terminal use env.render(\"ansi\") or '
+          'env.render(\"rgb_array\").')
     sys.exit(-1)
+
 
 class Window:
     """
@@ -58,7 +61,6 @@ class Window:
         self.imshow_obj.set_data(img)
         self.fig.canvas.draw()
 
-
         # Let matplotlib process UI events
         # This is needed for interactive mode to work properly
         plt.pause(0.001)
@@ -85,7 +87,6 @@ class Window:
 
         # handler
         self.fig.canvas.mpl_connect(event_type, handler)
-
 
     def show(self, block=True):
         """
