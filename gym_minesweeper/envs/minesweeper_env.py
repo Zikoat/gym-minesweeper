@@ -112,6 +112,9 @@ class MinesweeperEnv(gym.Env):
             self._assert_invariants()
         return self._get_observation()
 
+    def legal_actions(self):
+        return np.flatnonzero(((self.open_cells-1)*-1).T)
+
     def render(self, mode='human'):
         if self.debug:
             self._assert_invariants()

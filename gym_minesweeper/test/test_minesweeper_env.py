@@ -106,3 +106,18 @@ class TestMinesweeperEnv(TestCase):
 
         self.assertEqual(observation_reset.shape, observation_step.shape)
         self.assertTrue(np.array_equal(expected_observation, observation_reset))
+
+    def test_legal_actions(self):
+        prev_legal_actions = self.env.legal_actions()
+        self.assertEqual(self.env.legal_actions().size, self.env.action_space.n)
+        ob, reward, episode_over, info = self.env.step(self.env.action_space.sample())
+
+        current_legal_actions = self.env.legal_actions()
+        print(current_legal_actions)
+        self.assertLess(current_legal_actions.size, prev_legal_actions.size)
+
+        while not episode_over:
+            ob, reward, episode_over, info = self.env.step(self.env.legal_actions()[0])
+
+        self.assertTrue(self.env._is_done())
+        self.assertEqual(0, info["unnecessary steps"])
