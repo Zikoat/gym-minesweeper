@@ -21,7 +21,6 @@ class TestMinesweeperEnv(TestCase):
         if episode_over:
             self.assertLess(reward, 0)
             self.assertTrue(info["game over"])
-            self.assertTrue(info["died this turn"])
         else:
             self.assertGreater(reward, 0)
 
@@ -94,12 +93,11 @@ class TestMinesweeperEnv(TestCase):
         ob, reward, episode_over, info = env.step(31)
         print(info["mine locations"])
         print(env.render("ansi"))
-        print(info["opened cell"])
+        self.assertEqual((7, 3), info["opened cell"])
         self.assertTrue(episode_over)
 
         self.assertEquals(reward, -1)
         self.assertIn(-2, ob)
-        self.assertTrue(info["died this turn"])
         self.assertEqual(1, info["steps"])
         self.assertEqual(1, info["opened cells"])
 

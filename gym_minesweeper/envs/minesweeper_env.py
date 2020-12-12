@@ -83,23 +83,24 @@ class MinesweeperEnv(gym.Env):
                  Official evaluations of your agent are not allowed to
                  use this for learning.
         """
-        prev_game_over = self._game_over()
 
         self.steps += 1
         x, y = self._parse_action(action)
         self._open_cell(x, y)
 
-        reward = self._get_reward()
-        observation = self._get_observation()
-        done = self._is_done()
-
-        if self.debug and not prev_game_over and done:
+        if self.debug and self._game_over():
             print("game over")
-
         if self.debug:
             self._assert_invariants()
 
-        return observation, reward, done, self._get_info(prev_game_over, action)
+        return self._get_state(action)
+
+    def _get_state(self, action):
+        observation = self._get_observation()
+        reward = self._get_reward()
+        done = self._is_done()
+        info = self._get_info(action)
+        return observation, reward, done, info
 
     def reset(self):
         self.open_cells = np.zeros((self.width, self.height))
@@ -249,13 +250,12 @@ class MinesweeperEnv(gym.Env):
                 mine_count += 1
         return mine_count
 
-    def _get_info(self, prev_game_over, action):
+    def _get_info(self, action=None):
         return {
             "opened cells": np.count_nonzero(self.open_cells),
             "steps": self.steps,
             "unnecessary steps": self.unnecessary_steps,
             "game over": self._game_over(),
-            "died this turn": self._game_over() and not prev_game_over,
             "mine locations": self.mines.astype(int),
             "opened cell": self._parse_action(action)
         }
