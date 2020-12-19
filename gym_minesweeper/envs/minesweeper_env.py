@@ -10,7 +10,8 @@ class MinesweeperEnv(gym.Env):
     reward_range = (-float(1), float(1))
 
     def __init__(self, width=8, height=8, mine_count=10, flood_fill=True,
-                 debug=True, punishment=0.01, seed=None):
+                 debug=True, punishment=0.01, seed=None, first_move_safe=True):
+        self.first_move_safe = first_move_safe
         self.width = width
         self.height = height
         self.mines_count = mine_count
@@ -84,9 +85,22 @@ class MinesweeperEnv(gym.Env):
                  use this for learning.
         """
 
+        first_move = False
+        if self.steps == 0:
+            first_move = True
+            assert self._get_reward() == 0
+
+        if self._get_reward() == 0:
+            assert self.steps == 0
+
         self.steps += 1
+
         x, y = self._parse_action(action)
         self._open_cell(x, y)
+
+        if first_move and self._game_over() and self.first_move_safe:
+            self.reset()
+            self.step(action)
 
         if self.debug and self._game_over():
             print("game over")
